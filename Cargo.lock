@@ -24,21 +24,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d301b3b94cb4b2f23d7917810addbbaff90738e0ca2be692bd027e70d7e0330c"
 
 [[package]]
-name = "atm0s-decentralized-p2p-live-stream-native"
-version = "0.1.0"
-
-[[package]]
-name = "atm0s-decentralized-p2p-live-stream-protocol"
-version = "0.1.0"
-
-[[package]]
-name = "atm0s-decentralized-p2p-live-stream-web"
-version = "0.1.0"
-dependencies = [
- "yew",
-]
-
-[[package]]
 name = "autocfg"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -109,6 +94,21 @@ checksum = "a06aeb73f470f66dcdbf7223caeebb85984942f22f1adb2a088cf9668146bbbc"
 dependencies = [
  "cfg-if",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "decentralized-p2p-streaming-native"
+version = "0.1.0"
+
+[[package]]
+name = "decentralized-p2p-streaming-protocol"
+version = "0.1.0"
+
+[[package]]
+name = "decentralized-p2p-streaming-web"
+version = "0.1.0"
+dependencies = [
+ "yew",
 ]
 
 [[package]]

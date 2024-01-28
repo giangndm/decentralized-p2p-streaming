@@ -3,6 +3,7 @@
 - Version: 0.1-draft
 - Last update: 2024-01-01
 - Author: giang.ndm@gmail.com (https://github.com/giangndm)
+- Status: Draft
 
 ## 1. Introduction
 

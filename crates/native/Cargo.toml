@@ -1,5 +1,5 @@
 [package]
-name = "atm0s-decentralized-p2p-live-stream-native"
+name = "decentralized-p2p-streaming-native"
 version = "0.1.0"
 edition = "2021"
 

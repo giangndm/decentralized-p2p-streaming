@@ -1,37 +1,45 @@
-# atm0s decentraized p2p streaming
+# Decentralized p2p streaming stack
 
-This is a streaming stack for building decentralized p2p streaming applications like video conference, live streaming, etc. The goal is to build the stack with minimum server usage and maximum p2p usage but still maintain the latency and quality of streaming. In theory, with p2p NATS traversal success rate is around 70%, it can reduce the cost of streaming service to zero if we have enough users.
-
-## How it works
-
-By using some ideas from original atm0s-sdn for create a decentralized p2p network with some protocol liked WebRTC, WebSocket.
-
-The main idea is publisher best next hop is synced to all neighbours, and the each neighbours is continue to sync to their neighbours. So the subscriber can known the best next hop to connect to the publisher.
-
-The details of protocol is in [rfc draft](./crates/protocol/docs/rfcs/2023-decentralized-p2p-streaming-01.md).
-
-## Modules
-
-- Native module: which is used in native application or running as relay server.
-- Web module: which is used in web application.
-- Protocol: define the protocol for p2p streaming.
+This is a streaming stack for building decentralized peer-to-peer (p2p) streaming applications, such as video conferences and live streaming. The goal is to minimize server usage and maximize p2p usage while maintaining low latency and high streaming quality. In theory, with a p2p NATS traversal success rate of around 70%, the cost of streaming service can be reduced to zero if there are enough users.
 
 ## Status
 
-This is in very early stage of development, so it's not ready for production. But you can try it out and give me some feedback.
+This project is in its early stages of development and is not yet ready for production. However, you can try it out and provide feedback.
 
-## Check list
+We welcome any contributions, including code, documentation, and feedback. If you have any questions, please feel free to open an issue.
 
-- [ ] Basic protocol, rfc draft (Working in progress)
+If you are interested in this project, please give it a star to show your support. It would make us very happy.
+
+## How it works
+
+The stack utilizes ideas from the original atm0s-sdn to create a decentralized p2p network using protocols like WebRTC and WebSocket.
+
+The main idea is that the publisher's best next hop is synchronized with all neighbors, and each neighbor continues to sync with their own neighbors. This allows subscribers to know the best next hop to connect to the publisher.
+
+For more details on the protocol, refer to the [rfc draft](./crates/protocol/docs/rfcs/2023-decentralized-fast-pubsub.md).
+
+![Decentralized p2p streaming stack](./docs/imgs/network.excalidraw.png)
+
+## Modules
+
+- Native module: used in native applications or as a relay server.
+- Web module: used in web applications.
+- Protocol: defines the protocol for p2p streaming.
+
+## Checklist
+
+- [x] Basic protocol, rfc draft
 - [ ] Native module with WebRTC
 - [ ] Web module with WebRTC
 - [ ] Audio streaming
 - [ ] Video streaming
-- [ ] High quality, Multi-layers Video streaming
+- [ ] High-quality, multi-layered video streaming
 
 ## Roadmap
 
-- [ ] Bootstrap: Implement first version of protocol with audio only (Opus)
-- [ ] Optimize: Improving decentralized network topology and testing in real world
-- [ ] Enhancing 1: Implement video streaming (AV1)
-- [ ] Enhancing 2: Implement high quality, multi-layers video streaming (AV1)
+- [ ] Bootstrap: Implement the first version of the protocol with audio only (Opus)
+- [ ] Optimize: Improve decentralized network topology and test in real-world scenarios
+- [ ] Protocol: Finalize the protocol and publish the rfc draft as version 1.0.0
+- [ ] Enhancement 1: Implement video streaming (AV1)
+- [ ] Enhancement 2: Implement high-quality, multi-layered video streaming (AV1)
+- [ ] Enhancement 3: Make it as library for easy integration into other projects
