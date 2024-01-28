@@ -8,44 +8,38 @@
 
 ### 1.1 Purpose
 
-Today streaming application is used very widely, from video conference, live streaming, etc. But most of them are using centralized server to stream data to clients. This is not good for privacy and security and take a lot of cost for server. So we need a decentralized streaming protocol to solve this problem.
+Today, streaming applications are widely used, from video conferences to live streaming, etc. However, most of them use centralized servers to stream data to clients, which raises privacy and security concerns and incurs high server costs. Therefore, we need a decentralized streaming protocol to address these issues.
 
-In this document, we will propose a solution for creating a decentralized streaming protocol which remain the latency and quality of streaming but reduce the cost of streaming service to zero if we have enough users.
+In this document, we propose a solution for creating a decentralized streaming protocol that maintains the latency and quality of streaming while reducing the cost of streaming service to zero if we have enough users.
 
 ### 1.2 Scope
 
-This protocol is intended to be used for creating decentralized streaming applications like video conference, live streaming, etc. Which support audio and video streaming and also chat channel.
+This protocol is intended for creating decentralized streaming applications such as video conferences, live streaming, etc., which support audio and video streaming as well as chat channels.
 
 ## 2. Terminology
 
-In this document we will use some terms:
+In this document, we will use the following terms:
 
-- **Publisher**: The node which is streaming data to other nodes.
-- **Subscriber**: The node which is receiving data from publisher.
-- **Relay**: The node which is used to relay data from publisher to subscriber.
-- **Neighbour**: The node which is connected to other node.
-- **Best next hop**: The best neighbour to connect to publisher.
-- **Channel**: The channel which is used to stream data.
+- **Node**: The node in the network.
+- **Connection**: The connection between 2 nodes.
+- **Publisher**: The node that streams data to other nodes.
+- **Subscriber**: The node that receives data from the publisher.
+- **Relay**: The node used to relay data from the publisher to the subscriber.
+- **Neighbour**: The node connected to another node.
+- **Best next hop**: The best neighbour to connect to the publisher.
+- **Channel**: The channel used to stream data.
 - **Stream**: Audio or video stream.
 - **Packet**: Audio or video packet.
 
 ## 3. Protocol Overview
 
-Asume that we already has a p2p network which connected all nodes together without any partion. We can use any of network topology like structed or unstructed, etc. Some network topology like Kademlia, Chord, etc. can be used to create a p2p network.
+Assuming we already have a peer-to-peer (p2p) network that connects all nodes together without any partition, we can use any network topology such as structured or unstructured, etc. Some network topologies like Kademlia, Chord, etc. can be used to create a p2p network.
 
-### 3.1 Connection cost function
+### 3.1 Connection Cost Function
 
-The connection cost function is used to calculate the cost of connection between two nodes. The cost is used to find the best next hop to connect to publisher.
+The connection cost function is used to calculate the cost of the connection between two nodes. The cost is used to determine the best next hop to connect to the publisher.
 
-The cost function is calculated by:
-
-```
-cost = A * latency + B * current_usage + C * packet_loss + D * jitter + E
-```
-
-And above cost function need to same for all nodes in the network.
-
-Periodically, each node will ping all neighbours to get the latency, packet loss, jitter, etc. Then the cost function will be calculated and saved to metrics table in each node:
+The cost function is calculated based on factors such as latency, packet loss, jitter, etc. Each node periodically pings its neighbors to gather these metrics. The cost function is then applied, and the resulting costs are saved in a metrics table for each node:
 
 | Neighbour | Cost |
 |-----------|------|
@@ -53,13 +47,11 @@ Periodically, each node will ping all neighbours to get the latency, packet loss
 | Node02    | 15   |
 | Node01    | 20   |
 
-Note that we can have multiple connections between 2 nodes. The connection can be TCP, UDP, WebRTC, etc.
+It's important to note that there can be multiple connections between two nodes, which can use different protocols like TCP, UDP, WebRTC, etc.
 
 ### 3.2 Router table
 
-Router table is used to store the best next hop to connect to publisher. The router table is synced to all neighbours.
-
-Each node will hold a router table like bellow:
+The router table is used to store information about the best next hop to connect to the publisher. Each node maintains its own router table, which contains the following columns:
 
 | Channel   | Next hop | Cost |       Path       |
 |-----------|----------|------|------------------|
@@ -67,46 +59,50 @@ Each node will hold a router table like bellow:
 | Channel02 | Node02   | 15   | [Node02]         |
 | Channel03 | Node03   | 20   | [Node03, Node02] |
 
+In the table, each row represents a channel, and the corresponding columns provide information about the best next hop node to reach the publisher for that channel, the cost associated with the connection, and the path taken to reach the publisher.
+
+The router table is periodically synchronized with all neighboring nodes to ensure that each node has the most up-to-date information about the network topology.
+
 ### 3.3 Router sync
 
-The router table is synced to all neigbour prediodically. The sync period default is 1 second.
+The router table is synchronized with all neighbors periodically, with a default sync period of 1 second.
 
-The sync message is generate by bellow algorithm:
+The sync message is generated by the algorithm below:
 
 ```
-For each neighbour connection:
-    Create new SYNC_MSG
-    For each channel in router table:
-        Select the best next hop for that channel which path not contain neighbour
+For each neighbor connection:
+    Create a new SYNC_MSG
+    For each channel in the router table:
+        Select the best next hop for that channel, excluding the neighbor in path
         Append (channel, next_hop, connection, cost) to SYNC_MSG
     End for
-    Send SYNC_MSG to neighbour
+    Send SYNC_MSG to the neighbor
 End for
 ```
 
 ### 3.4 Fast path prove
 
-For proving, we will start with any incorrect state at beginning and prove that the state of network will become correct after some sync cycles.
+To prove the correctness of the network state, we start with an initial incorrect state and demonstrate that the network state will eventually become correct after several synchronization cycles.
 
-Start with node which has publisher called root node, which will have only one rule: loop back with cost 0. The root node will send sync message to all neighbours. The neighbours will receive the sync message and update their router table. At that point, all direct neighbour will have correct router rule of direct connection to root node.
+We begin with a root node, which acts as the publisher and has only one rule: a loopback connection with a cost of 0. The root node sends a sync message to all its neighbors. The neighbors receive the sync message and update their router tables. At this point, all direct neighbors have the correct router rule for a direct connection to the root node.
 
-After that, each directed neighbour of the root node will continue sync router to all other its neighbours. The sync will be spread therefore all nodes will be synced after some sync cycles.
+Next, each direct neighbor of the root node continues to sync their router tables with all their other neighbors. This synchronization process spreads throughout the network, ensuring that all nodes are eventually synced after several sync cycles.
 
-And with above sync message build logic, it also avoid the loop in the network.
+By following this logic for building the sync messages, we also prevent network loops from occurring.
 
 ### 3.5 Stream data flow
 
-By use above router table, from subscribe it will send SUB request to it self. Each time a node receive SUB command, it will check if already has RELAY for that channel and simple add sender as relay destinations, if don't have RELAY for that channel it simple create RELAY and send SUB to next hop.
+Using the router table mentioned above, when a node subscribes to a channel, it sends a SUB request to itself. Upon receiving the SUB command, the node checks if it already has a RELAY for that channel. If it does, it simply adds the sender as a relay destination. If it doesn't have a RELAY for that channel, it creates a new RELAY and sends the SUB request to the next hop.
 
-By that way, we can build a optimal tree of RELAY for each channel.
+This approach allows us to build an optimal tree of RELAY nodes for each channel.
 
-For avoiding waste bandwidth, each RELAY will periodically send SUB to next hop if it still has subscriber. If it don't have any subscriber, it will send UNSUB to next hop and remove itself. RELAY also remove destination if it don't receive SUB from destination after timeout.
+To avoid wasting bandwidth, each RELAY periodically sends SUB requests to the next hop if it still has subscribers. If a RELAY no longer has any subscribers, it sends an UNSUB request to the next hop and removes itself. Additionally, a RELAY removes a destination if it doesn't receive any SUB requests from that destination within a certain timeout period.
 
 ## 4. Protocol Details
 
 ### 4.1 Protocol Messages
 
-For adapt with different programing language, we will use protobuf to define protocol messages.
+To adapt to different programming languages, we will use protobuf to define protocol messages.
 
 SYNC_MSG:
 ```
