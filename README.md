@@ -4,7 +4,7 @@ This is a streaming stack for building decentralized peer-to-peer (p2p) streamin
 
 ## Status
 
-This project is in its early stages of development and is not yet ready for production. However, you can try it out and provide feedback.
+This project is in its early stages of development and is not yet usable. However, you can read rfc and provide feedback.
 
 We welcome any contributions, including code, documentation, and feedback. If you have any questions, please feel free to open an issue.
 
@@ -34,6 +34,7 @@ For more details on the protocol, refer to the [rfc draft](./crates/protocol/doc
 - [ ] Audio streaming
 - [ ] Video streaming
 - [ ] High-quality, multi-layered video streaming
+- [ ] Library for easy integration into other projects
 
 ## Roadmap
 
