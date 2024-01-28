@@ -1,7 +1,7 @@
 # RFC for Decentralized Streaming Protocol
 
-- Version: 0.1-draft
-- Last update: 2024-01-01
+- Version: unversioned
+- Last updated: 2024-01-29
 - Author: giang.ndm@gmail.com (https://github.com/giangndm)
 - Status: Draft
 
