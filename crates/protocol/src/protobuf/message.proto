@@ -1,0 +1,40 @@
+syntax = "proto2";
+
+package protobuf.message;
+
+message Protocol {
+    message RouterRow {
+        required uint32 channel = 1;
+        required uint32 rtt = 2;
+        required float loss = 3;
+        required uint32 jitter = 4;
+        required uint32 bandwidth = 5;
+        repeated uint32 hops = 6;
+    }
+
+    message RouterSync {
+        repeated RouterRow rows = 1;
+    }
+
+    message ChannelSub {
+        required uint32 channel = 1;
+    }
+
+    message ChannelUnsub {
+        required uint32 channel = 1;
+    }
+
+    message ChannelData {
+        required uint32 channel = 1;
+        required bytes data = 2;
+    }
+
+    message NetworkMessage {
+        oneof message_type {
+            RouterSync router_sync = 1;
+            ChannelSub channel_sub = 2;
+            ChannelUnsub channel_unsub = 3;
+            ChannelData channel_data = 4;
+        };
+    }
+}
