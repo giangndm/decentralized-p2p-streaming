@@ -31,6 +31,7 @@ impl ChannelRoute {
     }
 
     pub fn create_sync(&self, dest: NodeId) -> Option<ChannelPath> {
+        //TODO: optimize this with O(1) algorithm
         //find the best path to the destination which hops not contains dest
         let mut best_path: Option<&ChannelPath> = None;
         for path in self.paths.values() {
@@ -48,6 +49,7 @@ impl ChannelRoute {
     }
 
     pub fn next_hop(&self) -> Option<Connection> {
+        //TODO: optimize this with O(1) algorithm
         //find the best path to the destination which hops not contains dest
         let mut best: Option<(&Connection, &ChannelPath)> = None;
         for (conn, path) in &self.paths {
