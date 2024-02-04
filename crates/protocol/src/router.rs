@@ -76,6 +76,9 @@ impl Router {
             }
             InputEvent::ConnectionDisconnected(conn) => {
                 self.conns.remove(&conn);
+                for channel in self.remote_channels.values_mut() {
+                    channel.on_disconnected(conn);
+                }
             }
             InputEvent::ConnectionStats(stats) => {
                 let NetworkMsg { conn, msg } = stats;

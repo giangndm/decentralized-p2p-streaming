@@ -3,18 +3,19 @@ use std::collections::{HashMap, VecDeque};
 use crate::{
     addr::{ChannelId, NodeId},
     network::{Connection, ConnectionStats, NetworkMsg},
-    protocol::network_message::MessageType,
+    protocol::{network_message::MessageType, ChannelSub},
     pubsub::{self, Pubsub},
     router::{self, NextHop, Router},
 };
 
 pub enum InputEvent {
-    Recv(NetworkMsg<MessageType>),
+    ConnectionRecv(NetworkMsg<MessageType>),
+    ConnectionDisconnected(Connection),
     Stats(NetworkMsg<ConnectionStats>),
 }
 
 pub enum OutputEvent {
-    Send(NetworkMsg<MessageType>),
+    ConnectionSend(NetworkMsg<MessageType>),
     OnChannelData(ChannelId, Vec<u8>),
 }
 
@@ -49,7 +50,29 @@ impl P2pStreamRunner {
                 self.router
                     .on_event(now_ms, router::InputEvent::ConnectionStats(msg));
             }
-            InputEvent::Recv(NetworkMsg { conn, msg }) => match msg {
+            InputEvent::ConnectionDisconnected(conn) => {
+                self.router
+                    .on_event(now_ms, router::InputEvent::ConnectionDisconnected(conn));
+                let mut removed_channels = vec![];
+                for (channel_id, remote_conn) in self.remote_channels.iter() {
+                    if *remote_conn == conn {
+                        removed_channels.push(*channel_id);
+                        if let Some(NextHop::Remote(conn)) = self.router.next_hop_for(*channel_id) {
+                            self.outputs
+                                .push_back(OutputEvent::ConnectionSend(NetworkMsg {
+                                    conn,
+                                    msg: MessageType::ChannelSub(ChannelSub {
+                                        channel: **channel_id,
+                                    }),
+                                }));
+                        }
+                    }
+                }
+                for channel in removed_channels {
+                    self.remote_channels.remove(&channel);
+                }
+            }
+            InputEvent::ConnectionRecv(NetworkMsg { conn, msg }) => match msg {
                 MessageType::RouterSync(sync) => {
                     self.router.on_event(
                         now_ms,
@@ -84,10 +107,11 @@ impl P2pStreamRunner {
     fn pop_router_outputs(&mut self) {
         let sync_msgs = self.router.create_sync();
         for sync in sync_msgs {
-            self.outputs.push_back(OutputEvent::Send(NetworkMsg {
-                conn: sync.conn,
-                msg: MessageType::RouterSync(sync.msg),
-            }));
+            self.outputs
+                .push_back(OutputEvent::ConnectionSend(NetworkMsg {
+                    conn: sync.conn,
+                    msg: MessageType::RouterSync(sync.msg),
+                }));
         }
     }
 
@@ -105,25 +129,28 @@ impl P2pStreamRunner {
                             continue;
                         }
                     };
-                    self.outputs.push_back(OutputEvent::Send(NetworkMsg {
-                        conn,
-                        msg: MessageType::ChannelSub(sub),
-                    }));
+                    self.outputs
+                        .push_back(OutputEvent::ConnectionSend(NetworkMsg {
+                            conn,
+                            msg: MessageType::ChannelSub(sub),
+                        }));
                 }
                 pubsub::OutputEvent::SendUnsub(unsub) => {
                     let channel_id = unsub.channel.into();
                     if let Some(conn) = self.remote_channels.remove(&channel_id) {
-                        self.outputs.push_back(OutputEvent::Send(NetworkMsg {
-                            conn,
-                            msg: MessageType::ChannelUnsub(unsub),
-                        }));
+                        self.outputs
+                            .push_back(OutputEvent::ConnectionSend(NetworkMsg {
+                                conn,
+                                msg: MessageType::ChannelUnsub(unsub),
+                            }));
                     }
                 }
                 pubsub::OutputEvent::SendData(NetworkMsg { conn, msg }) => {
-                    self.outputs.push_back(OutputEvent::Send(NetworkMsg {
-                        conn,
-                        msg: MessageType::ChannelData(msg),
-                    }));
+                    self.outputs
+                        .push_back(OutputEvent::ConnectionSend(NetworkMsg {
+                            conn,
+                            msg: MessageType::ChannelData(msg),
+                        }));
                 }
                 pubsub::OutputEvent::OnChannelData(channel_id, data) => self
                     .outputs
