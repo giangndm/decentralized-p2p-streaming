@@ -100,6 +100,11 @@ impl P2pStreamRunner {
                     );
                     self.pop_pubsub_outputs();
                 }
+                MessageType::ChordNotify(..) => {}
+                MessageType::ChordSuccessorQuery(..) => {}
+                MessageType::ChordSuccessorResponse(..) => {}
+                MessageType::ChordPredecessorQuery(..) => {}
+                MessageType::ChordPredecessorResponse(..) => {}
             },
         }
     }

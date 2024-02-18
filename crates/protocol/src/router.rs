@@ -66,7 +66,7 @@ impl Router {
                         if let Some(stats) = self.conns.get(&conn) {
                             let mut path = ChannelPath::from_row(now_ms, row);
                             path.metric = path.metric.add_local(stats);
-                            path.hops.push(conn.node());
+                            path.hops.push(conn.remote());
                             channel.on_sync(now_ms, conn, path);
                         }
                     } else {
@@ -119,7 +119,7 @@ impl Router {
                 if self.local_channels.contains_key(id) {
                     continue;
                 }
-                if let Some(row) = channel.create_sync(conn.node()) {
+                if let Some(row) = channel.create_sync(conn.remote()) {
                     rows.push(row.to_row(*id));
                 }
             }

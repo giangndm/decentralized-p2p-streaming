@@ -13,7 +13,7 @@ impl Connection {
         Self(node, session)
     }
 
-    pub fn node(&self) -> NodeId {
+    pub fn remote(&self) -> NodeId {
         self.0
     }
 

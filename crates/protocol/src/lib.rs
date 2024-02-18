@@ -7,6 +7,7 @@ mod protobuf {
 }
 
 mod addr;
+mod chord;
 mod network;
 mod pubsub;
 mod router;
