@@ -29,12 +29,40 @@ message Protocol {
         required bytes data = 2;
     }
 
+    message ChordNotify {
+        required uint32 node_id = 1;
+        required string address = 2;
+    }
+
+    message ChordSuccessorQuery {
+        required uint32 key = 1;
+    }
+
+    message ChordSuccessorResponse {
+        required uint32 node_id = 1;
+        required string address = 2;
+    }
+
+    message ChordPredecessorQuery {
+        required uint32 key = 1;
+    }
+
+    message ChordPredecessorResponse {
+        required uint32 node_id = 1;
+        required string address = 2;
+    }
+
     message NetworkMessage {
         oneof message_type {
             RouterSync router_sync = 1;
             ChannelSub channel_sub = 2;
             ChannelUnsub channel_unsub = 3;
             ChannelData channel_data = 4;
+            ChordNotify chord_notify = 5;
+            ChordSuccessorQuery chord_successor_query = 6;
+            ChordSuccessorResponse chord_successor_response = 7;
+            ChordPredecessorQuery chord_predecessor_query = 8;
+            ChordPredecessorResponse chord_predecessor_response = 9;
         };
     }
 }
